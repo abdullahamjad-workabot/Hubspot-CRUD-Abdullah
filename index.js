@@ -74,5 +74,37 @@ app.post("/contacts", async (req, res) => {
   }
 });
 
+// Update Entire Contact 
+
+app.put("/contacts/:contactId", async (req, res) => {
+  try {
+
+    const { contactId } =
+      req.params;
+
+    const response =
+      await axios.patch(
+        `${BASE_URL}/crm/v3/objects/contacts/${contactId}`,
+        {
+          properties: req.body,
+        },
+        {
+          headers,
+        }
+      );
+
+    res.status(200).json(response.data);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: "Update failed",
+      error:
+        error.response?.data ||
+        error.message,
+    });
+
+  }
+});
 
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
