@@ -46,5 +46,33 @@ app.get("/contacts", async (req, res) => {
   }
 });
 
+app.post("/contacts", async (req, res) => {
+  try {
+
+    const response =
+      await axios.post(
+        `${BASE_URL}/crm/v3/objects/contacts`,
+        {
+          properties: req.body,
+        },
+        {
+          headers,
+        }
+      );
+
+    res.status(201).json(response.data);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: "Create failed",
+      error:
+        error.response?.data ||
+        error.message,
+    });
+
+  }
+});
+
 
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
