@@ -140,4 +140,62 @@ app.patch("/contacts/:contactId", async (req, res) => {
   }
 });
 
+app.post("/contacts/upsert", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const search = await axios.post(
+      `${BASE_URL}/crm/v3/objects/contacts/search`,
+      {
+        filterGroups: [
+          {
+            filters: [
+              {
+                propertyName: "email",
+                operator: "EQ",
+                value: email,
+              },
+            ],
+          },
+        ],
+      },
+      { headers }
+    );
+
+    const existing = search.data.results?.[0];
+
+    if (existing) {
+      const updated = await axios.patch(
+        `${BASE_URL}/crm/v3/objects/contacts/${existing.id}`,
+        { properties: req.body },
+        { headers }
+      );
+
+      return res.json({
+        message: "Updated",
+        data: updated.data,
+      });
+    }
+
+    const created = await axios.post(
+      `${BASE_URL}/crm/v3/objects/contacts`,
+      { properties: req.body },
+      { headers }
+    );
+
+    return res.json({
+      message: "Created",
+      data: created.data,
+    });
+
+  } catch (error) {
+    console.log(error.response?.data || error.message);
+
+    return res.status(500).json({
+      message: "Upsert failed",
+      error: error.response?.data || error.message,
+    });
+  }
+});
+
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
